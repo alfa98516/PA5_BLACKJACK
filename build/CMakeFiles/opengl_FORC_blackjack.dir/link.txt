@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/opengl_FORC_blackjack.dir/main.cpp.o -o opengl_FORC_blackjack  -lglfw -lGLEW::glew /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so 
