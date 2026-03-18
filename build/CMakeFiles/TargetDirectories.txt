@@ -1,3 +1,0 @@
-/home/alfa/programmer_socks/git/PA5_BLACKJACK/build/CMakeFiles/opengl_FORC_blackjack.dir
-/home/alfa/programmer_socks/git/PA5_BLACKJACK/build/CMakeFiles/edit_cache.dir
-/home/alfa/programmer_socks/git/PA5_BLACKJACK/build/CMakeFiles/rebuild_cache.dir

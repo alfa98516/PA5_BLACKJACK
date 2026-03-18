@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/alfa/programmer_socks/git/PA5_BLACKJACK/build",
-  "command": "/usr/bin/c++   -g -o CMakeFiles/opengl_FORC_blackjack.dir/main.cpp.o -c /home/alfa/programmer_socks/git/PA5_BLACKJACK/src/main.cpp",
-  "file": "/home/alfa/programmer_socks/git/PA5_BLACKJACK/src/main.cpp",
-  "output": "CMakeFiles/opengl_FORC_blackjack.dir/main.cpp.o"
-}
-]
