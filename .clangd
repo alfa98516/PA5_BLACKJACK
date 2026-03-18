@@ -1,0 +1,4 @@
+CompileFlags:
+  Add:
+    - -I./glad/include
+    - -I./build/_deps/glfw-src/include
