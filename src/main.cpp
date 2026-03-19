@@ -3,8 +3,12 @@
 
 #ifdef __linux__
 #include <alloca.h>
+#include <signal.h>
 #include <unistd.h>
 #endif
+#define ASSERT(x)                                                                                  \
+    if (!(x))                                                                                      \
+        raise(SIGTRAP);
 #ifdef __APPLE__
 #include <alloca.h>
 #include <mach-o/dyld.h>
@@ -12,6 +16,10 @@
 #ifdef _WIN32
 #include <malloc.h>
 #include <windows.h>
+#define ASSERT(x)                                                                                  \
+    if (!(x))                                                                                      \
+        __debugBreak();
+
 #endif
 
 #include <cstdint>
@@ -24,6 +32,19 @@
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
 #include <GLFW/glfw3.h>
 #include <iostream>
+
+static void GLClearError() {
+    while (glGetError() != GL_NO_ERROR)
+        ;
+}
+
+static bool GLLogCall() {
+    while (GLenum error = glGetError()) {
+        std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
+        return false;
+    }
+    return true;
+}
 
 static std::filesystem::path getExecutableDir() {
 #ifdef _WIN32
@@ -133,7 +154,6 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
-    // gladLoadGL replaces glewInit
     if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
@@ -141,16 +161,28 @@ int main() {
 
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
 
-    float vectors[6]{-0.5f, -0.5f, 0.0f, 0.5f, 0.5f, -0.5};
+    float vectors[12] = {
+        -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
+
+        -0.5f, 0.5,
+
+    };
+
+    uint32_t indices[] = {0, 1, 2, 2, 3, 0};
 
     uint32_t buffer;
-
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), vectors, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), vectors, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+    uint32_t ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+
     ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
     std::cout << "VERTEX\n";
     std::cout << source.VertexSource << '\n';
@@ -166,8 +198,9 @@ int main() {
         /* any rendering happens after this */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
+        GLClearError();
+        glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr);
+        ASSERT(GLLogCall());
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
