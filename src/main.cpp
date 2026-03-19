@@ -1,11 +1,74 @@
+// the alloca function is defined in different headers,
+// acording to the os
+
+#ifdef __linux__
 #include <alloca.h>
+#include <unistd.h>
+#endif
+#ifdef __APPLE__
+#include <alloca.h>
+#include <mach-o/dyld.h>
+#endif
+#ifdef _WIN32
+#include <malloc.h>
+#include <windows.h>
+#endif
+
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include <glad/gl.h>
+#include <sstream>
 #include <string>
 #include <sys/types.h>
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
 #include <GLFW/glfw3.h>
 #include <iostream>
+
+static std::filesystem::path getExecutableDir() {
+#ifdef _WIN32
+    char path[MAX_PATH];
+    GetModuleFileNameA(nullptr, path, MAX_PATH);
+    return std::filesystem::path(path).parent_path();
+#elif __linux__
+    return std::filesystem::canonical("/proc/self/exe").parent_path();
+#elif __APPLE__
+    char path[PATH_MAX];
+    uint32_t size = sizeof(path);
+    _NSGetExecutablePath(path, &size);
+    return std::filesystem::canonical(path).parent_path();
+#endif
+}
+
+struct ShaderProgramSource {
+    std::string VertexSource;
+    std::string FragmentSource;
+};
+
+static ShaderProgramSource ParseShader(const std::string& file) {
+
+    std::filesystem::path fullPath = getExecutableDir().parent_path() / file;
+    std::ifstream stream(fullPath);
+
+    enum class ShaderType { NONE = -1, VERTEX, FRAGMENT };
+
+    ShaderType type = ShaderType::NONE;
+    std::string line;
+    std::stringstream strstr[2];
+    while (getline(stream, line)) {
+        if (line.find("#shader") != std::string::npos) {
+            if (line.find("vertex") != std::string::npos) {
+                type = ShaderType::VERTEX;
+
+            } else if (line.find("fragment") != std::string::npos) {
+                type = ShaderType::FRAGMENT;
+            }
+        } else {
+            strstr[(int)type] << line << '\n';
+        }
+    }
+    return {strstr[0].str(), strstr[1].str()};
+}
 
 /*
  * @param source: An address to a string object, needs to be alive when calling
@@ -88,23 +151,15 @@ int main() {
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
+    std::cout << "VERTEX\n";
+    std::cout << source.VertexSource << '\n';
 
-    std::string vertexShader = "#version 330 core\n"
-                               "\n"
-                               "layout(location = 0) in vec4 position;\n"
-                               "\n"
-                               "void main() {\n"
-                               "   gl_Position = position;\n"
-                               "}\n";
+    std::cout << "FRAGMENT\n";
+    std::cout << source.FragmentSource << '\n';
 
-    std::string fragmentShader = "#version 330 core\n"
-                                 "layout(location = 0) out vec4 color;"
-                                 "\n"
-                                 "void main() {\n"
-                                 "   color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-                                 "}\n";
+    uint32_t shader = createShader(source.VertexSource, source.FragmentSource);
 
-    uint32_t shader = createShader(vertexShader, fragmentShader);
     glUseProgram(shader);
 
     while (!glfwWindowShouldClose(window)) {
@@ -117,7 +172,7 @@ int main() {
         glfwPollEvents();
     }
 
-    glDeleteShader(shader);
+    glDeleteProgram(shader);
 
     glfwTerminate();
     return 0;
