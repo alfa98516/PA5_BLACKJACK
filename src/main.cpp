@@ -5,13 +5,16 @@
 #include <alloca.h>
 #include <signal.h>
 #include <unistd.h>
-#endif
 #define ASSERT(x)                                                                                  \
     if (!(x))                                                                                      \
         raise(SIGTRAP);
+#endif
 #ifdef __APPLE__
 #include <alloca.h>
 #include <mach-o/dyld.h>
+#define ASSERT(x)                                                                                  \
+    if (!(x))                                                                                      \
+        raise(SIGTRAP);
 #endif
 #ifdef _WIN32
 #include <malloc.h>
