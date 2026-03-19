@@ -21,7 +21,7 @@
 #include <windows.h>
 #define ASSERT(x)                                                                                  \
     if (!(x))                                                                                      \
-        __debugBreak();
+        __debugbreak();
 
 #endif
 
