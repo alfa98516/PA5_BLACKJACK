@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 bool GLLogCall(const char* function, const char* file, int line) {
     while (GLenum error = glGetError()) {
