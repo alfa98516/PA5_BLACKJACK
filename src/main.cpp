@@ -152,7 +152,7 @@ int main() {
         return -1;
     }
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Window", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Window", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
         glfwTerminate();
@@ -161,12 +161,12 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
-    glfwSwapInterval(1);
-
     if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
     }
+
+    glfwSwapInterval(1);
 
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
 
@@ -222,8 +222,8 @@ int main() {
             incr = 0.5f;
         r += incr;
 
-        GLCall(glfwSwapBuffers(window));
-        GLCall(glfwPollEvents());
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     glDeleteProgram(shader);
