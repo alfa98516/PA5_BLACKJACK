@@ -1,6 +1,5 @@
-// the alloca function is defined in different headers,
-// acording to the os
-
+#include <cassert>
+#include <ios>
 #ifdef __linux__
 #include <alloca.h>
 #include <signal.h>
@@ -24,6 +23,10 @@
         __debugbreak();
 
 #endif
+#define GLCall(x)                                                                                  \
+    GLClearError();                                                                                \
+    x;                                                                                             \
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
 #include <cstdint>
 #include <filesystem>
@@ -41,9 +44,10 @@ static void GLClearError() {
         ;
 }
 
-static bool GLLogCall() {
+static bool GLLogCall(const char* function, const char* file, int line) {
     while (GLenum error = glGetError()) {
-        std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
+        std::cout << "[OpenGL Error] (" << std::hex << error << ")" << " in: " << function << " "
+                  << file << ":" << std::dec << line << std::endl;
         return false;
     }
     return true;
@@ -115,7 +119,7 @@ static uint32_t CompileShader(uint32_t type, const std::string& source) {
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
         char* message = (char*)alloca(length * sizeof(char)); // stack allocation.
         glGetShaderInfoLog(id, length, &length, message);
-        std::cerr << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fagment")
+        std::cerr << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment")
                   << " shader!\n";
         std::cerr << message << std::endl;
         glDeleteShader(id);
@@ -174,16 +178,17 @@ int main() {
     uint32_t indices[] = {0, 1, 2, 2, 3, 0};
 
     uint32_t buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), vectors, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), vectors, GL_STATIC_DRAW));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
     uint32_t ibo;
     glGenBuffers(1, &ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 
     ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
@@ -195,17 +200,28 @@ int main() {
 
     uint32_t shader = createShader(source.VertexSource, source.FragmentSource);
 
-    glUseProgram(shader);
+    GLCall(glUseProgram(shader));
+    GLCall(int location = glGetUniformLocation(shader, "u_color"));
+    ASSERT(location != -1);
+    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
+    float r = 0.0f;
+    float incr = 0.5f;
     while (!glfwWindowShouldClose(window)) {
         /* any rendering happens after this */
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-        GLClearError();
-        glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr);
-        ASSERT(GLLogCall());
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        if (r > 1.0f)
+            incr = -0.5f;
+        else if (r < 0.0f)
+            incr = 0.5f;
+        r += incr;
+
+        GLCall(glfwSwapBuffers(window));
+        GLCall(glfwPollEvents());
     }
 
     glDeleteProgram(shader);

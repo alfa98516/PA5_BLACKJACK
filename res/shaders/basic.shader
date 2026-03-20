@@ -11,7 +11,9 @@ void main() {
 #version 330 core
 layout(location = 0) out vec4 color;
 
+uniform vec4 u_color;
+
 void main() {
-    color = vec4(.3, .4, .6, 1.0);
+    color = u_color;
 };
 
