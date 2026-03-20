@@ -165,6 +165,11 @@ int main() {
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
     }
+    typedef BOOL(APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int);
+    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT =
+        (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+    if (wglSwapIntervalEXT)
+        wglSwapIntervalEXT(1);
 
     glfwSwapInterval(1);
 
@@ -208,8 +213,14 @@ int main() {
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
     float r = 0.0f;
-    float incr = 0.5f;
+    float incr = 0.05f;
+    double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
+        double now = glfwGetTime();
+        std::cout << "Frame time: " << (now - lastTime) * 1000 << "ms\n";
+        lastTime = now;
+        // ... rest of loop
+
         /* any rendering happens after this */
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
@@ -217,9 +228,9 @@ int main() {
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         if (r > 1.0f)
-            incr = -0.5f;
+            incr = -0.05f;
         else if (r < 0.0f)
-            incr = 0.5f;
+            incr = 0.05f;
         r += incr;
 
         glfwSwapBuffers(window);
