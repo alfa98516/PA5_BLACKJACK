@@ -1,102 +1,14 @@
-#include <cassert>
-#include <ios>
-#ifdef __linux__
-#include <alloca.h>
-#include <signal.h>
-#include <unistd.h>
-#define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        raise(SIGTRAP);
-#endif
-#ifdef __APPLE__
-#include <alloca.h>
-#include <mach-o/dyld.h>
-#define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        raise(SIGTRAP);
-#endif
-#ifdef _WIN32
-#include <malloc.h>
-#include <windows.h>
-#define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        __debugbreak();
-
-#endif
-#define GLCall(x)                                                                                  \
-    GLClearError();                                                                                \
-    x;                                                                                             \
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
 #include <cstdint>
-#include <filesystem>
-#include <fstream>
 #include <glad/gl.h>
-#include <sstream>
 #include <string>
 #include <sys/types.h>
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-static void GLClearError() {
-    while (glGetError() != GL_NO_ERROR)
-        ;
-}
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-    while (GLenum error = glGetError()) {
-        std::cout << "[OpenGL Error] (" << std::hex << error << ")" << " in: " << function << " "
-                  << file << ":" << std::dec << line << std::endl;
-        return false;
-    }
-    return true;
-}
-
-static std::filesystem::path getExecutableDir() {
-#ifdef _WIN32
-    char path[MAX_PATH];
-    GetModuleFileNameA(nullptr, path, MAX_PATH);
-    return std::filesystem::path(path).parent_path();
-#elif __linux__
-    return std::filesystem::canonical("/proc/self/exe").parent_path();
-#elif __APPLE__
-    char path[PATH_MAX];
-    uint32_t size = sizeof(path);
-    _NSGetExecutablePath(path, &size);
-    return std::filesystem::canonical(path).parent_path();
-#endif
-}
-
-struct ShaderProgramSource {
-    std::string VertexSource;
-    std::string FragmentSource;
-};
-
-static ShaderProgramSource ParseShader(const std::string& file) {
-
-    std::filesystem::path fullPath = getExecutableDir().parent_path() / file;
-    std::ifstream stream(fullPath);
-
-    enum class ShaderType { NONE = -1, VERTEX, FRAGMENT };
-
-    ShaderType type = ShaderType::NONE;
-    std::string line;
-    std::stringstream strstr[2];
-    while (getline(stream, line)) {
-        if (line.find("#shader") != std::string::npos) {
-            if (line.find("vertex") != std::string::npos) {
-                type = ShaderType::VERTEX;
-
-            } else if (line.find("fragment") != std::string::npos) {
-                type = ShaderType::FRAGMENT;
-            }
-        } else {
-            strstr[(int)type] << line << '\n';
-        }
-    }
-    return {strstr[0].str(), strstr[1].str()};
-}
+#include "IndexBuffer.hpp"
+#include "Renderer.hpp"
+#include "VertexBuffer.hpp"
 
 /*
  * @param source: An address to a string object, needs to be alive when calling
@@ -152,6 +64,10 @@ int main() {
         return -1;
     }
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Window", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
@@ -165,80 +81,77 @@ int main() {
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
     }
-    typedef BOOL(APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int);
-    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT =
-        (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-    if (wglSwapIntervalEXT)
-        wglSwapIntervalEXT(1);
 
     glfwSwapInterval(1);
 
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
 
-    float vectors[12] = {
-        -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
+    {
+        float vectors[12] = {
+            -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
 
-        -0.5f, 0.5,
+            -0.5f, 0.5,
 
-    };
+        };
 
-    uint32_t indices[] = {0, 1, 2, 2, 3, 0};
+        uint32_t indices[] = {0, 1, 2, 2, 3, 0};
 
-    uint32_t buffer;
-    GLCall(glGenBuffers(1, &buffer));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), vectors, GL_STATIC_DRAW));
+        uint32_t vao;
+        GLCall(glGenVertexArrays(1, &vao));
+        GLCall(glBindVertexArray(vao));
 
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+        VertexBuffer vb(vectors, 4 * 2 * sizeof(float));
 
-    uint32_t ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        GLCall(glEnableVertexAttribArray(0));
+        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+        IndexBuffer ib(indices, 6);
 
-    ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
-    std::cout << "VERTEX\n";
-    std::cout << source.VertexSource << '\n';
+        ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
+        std::cout << "VERTEX\n";
+        std::cout << source.VertexSource << '\n';
 
-    std::cout << "FRAGMENT\n";
-    std::cout << source.FragmentSource << '\n';
+        std::cout << "FRAGMENT\n";
+        std::cout << source.FragmentSource << '\n';
 
-    uint32_t shader = createShader(source.VertexSource, source.FragmentSource);
+        uint32_t shader = createShader(source.VertexSource, source.FragmentSource);
 
-    GLCall(glUseProgram(shader));
-    GLCall(int location = glGetUniformLocation(shader, "u_color"));
-    ASSERT(location != -1);
-    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
+        GLCall(glUseProgram(shader));
+        GLCall(int location = glGetUniformLocation(shader, "u_color"));
+        ASSERT(location != -1);
+        GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
-    float r = 0.0f;
-    float incr = 0.05f;
-    double lastTime = glfwGetTime();
-    while (!glfwWindowShouldClose(window)) {
-        double now = glfwGetTime();
-        std::cout << "Frame time: " << (now - lastTime) * 1000 << "ms\n";
-        lastTime = now;
-        // ... rest of loop
+        GLCall(glBindVertexArray(0));
+        GLCall(glUseProgram(0));
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-        /* any rendering happens after this */
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        float r = 0.0f;
+        float incr = 0.005f;
+        while (!glfwWindowShouldClose(window)) {
 
-        GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            /* any rendering happens after this */
+            GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-        if (r > 1.0f)
-            incr = -0.05f;
-        else if (r < 0.0f)
-            incr = 0.05f;
-        r += incr;
+            GLCall(glUseProgram(shader));
+            GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+            GLCall(glBindVertexArray(vao));
+            ib.Bind();
+            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+            if (r > 1.0f)
+                incr = -0.005f;
+            else if (r < 0.0f)
+                incr = 0.005f;
+            r += incr;
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+
+        glDeleteProgram(shader);
     }
-
-    glDeleteProgram(shader);
-
     glfwTerminate();
     return 0;
 }

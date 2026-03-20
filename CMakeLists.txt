@@ -10,15 +10,32 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(SOURCES
+    src/main.cpp
+    src/Renderer.cpp
+    src/VertexBuffer.cpp
+    src/IndexBuffer.cpp
+)
+
 include(cmake/CPM.cmake)
 
 CPMAddPackage("gh:glfw/glfw#3.4")
 
+
+
 # GLAD is just a local library now
 add_library(glad STATIC glad/src/gl.c)
-target_include_directories(glad PUBLIC glad/include)
+target_include_directories(glad PUBLIC
+    glad/include
+)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    src/
+)
 
 find_package(OpenGL REQUIRED)
 
