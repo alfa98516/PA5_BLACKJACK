@@ -161,6 +161,8 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1);
+
     if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
