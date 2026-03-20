@@ -1,3 +1,4 @@
+#pragma once
 #include <sys/types.h>
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
 #include <GLFW/glfw3.h>
