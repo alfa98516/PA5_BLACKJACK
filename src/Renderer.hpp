@@ -9,22 +9,19 @@
 #include <signal.h>
 #include <unistd.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        raise(SIGTRAP);
+    if (!(x)) raise(SIGTRAP);
 #endif
 #ifdef __APPLE__
 #include <alloca.h>
 #include <mach-o/dyld.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        raise(SIGTRAP);
+    if (!(x)) raise(SIGTRAP);
 #endif
 #ifdef _WIN32
 #include <malloc.h>
 #include <windows.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        __debugbreak();
+    if (!(x)) __debugbreak();
 
 #endif
 #define GLCall(x)                                                                                  \
@@ -33,11 +30,5 @@
     ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
 std::filesystem::path getExecutableDir();
-struct ShaderProgramSource {
-    std::string VertexSource;
-    std::string FragmentSource;
-};
-
-ShaderProgramSource ParseShader(const std::string& file);
 void GLClearError();
 bool GLLogCall(const char* function, const char* file, int line);

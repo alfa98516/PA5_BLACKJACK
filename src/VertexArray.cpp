@@ -7,6 +7,7 @@ VertexArray::VertexArray() { GLCall(glGenVertexArrays(1, &m_RendererID)); }
 
 void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout) {
 
+    Bind();
     vb.Bind();
     const auto& elements = layout.GetElements();
     uint32_t offset = 0;

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Renderer.hpp"
 #include <cstdint>
 #include <glad/gl.h>
@@ -31,13 +30,14 @@ class VertexBufferLayout {
     unsigned int m_Stride;
 
   public:
-    VertexBufferLayout();
+    VertexBufferLayout() : m_Stride(0) {}
 
     /*
      * @brief this is a stupid fucntion, MSVC allows excplicit template specialization for functions
      * but gcc does not, so i need to code it like this
      *
      */
+
     template <typename T> void Push(unsigned int count) {
 
         uint8_t normalized = GL_FALSE;
@@ -55,7 +55,7 @@ class VertexBufferLayout {
         }
 
         m_Elements.push_back({type, count, normalized});
-        m_Stride += VertexBufferElement::GetSizeOfType(type);
+        m_Stride += VertexBufferElement::GetSizeOfType(type) * count;
     }
 
     inline const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
