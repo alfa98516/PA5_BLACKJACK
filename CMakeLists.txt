@@ -16,7 +16,6 @@ set(SOURCES
     src/VertexBuffer.cpp
     src/IndexBuffer.cpp
     src/VertexArray.cpp
-    src/Test.cpp
 )
 
 include(cmake/CPM.cmake)

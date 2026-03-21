@@ -1,36 +1,63 @@
 #pragma once
 
+#include "Renderer.hpp"
 #include <cstdint>
 #include <glad/gl.h>
+#include <sys/types.h>
+#include <type_traits>
 #include <vector>
 struct VertexBufferElement {
     uint32_t type;
     uint32_t count;
-    bool normalized;
+    uint8_t normalized;
+
+    static unsigned int GetSizeOfType(uint32_t type) {
+        switch (type) {
+        case GL_FLOAT:
+            return 4;
+        case GL_UNSIGNED_INT:
+            return 4;
+        case GL_UNSIGNED_BYTE:
+            return 1;
+        }
+        ASSERT(false);
+        return 0;
+    }
 };
 
 class VertexBufferLayout {
+  private:
     std::vector<VertexBufferElement> m_Elements;
-    uint32_t m_Stride;
+    unsigned int m_Stride;
 
   public:
     VertexBufferLayout();
-    template <typename T> void Push(uint32_t count) { static_assert(false); }
 
-    template <> void Push<float>(uint32_t count) {
-        m_Elements.push_back({GL_FLOAT, count, false});
-        m_Stride += sizeof(GLfloat);
-    }
+    /*
+     * @brief this is a stupid fucntion, MSVC allows excplicit template specialization for functions
+     * but gcc does not, so i need to code it like this
+     *
+     */
+    template <typename T> void Push(unsigned int count) {
 
-    template <> void Push<uint32_t>(uint32_t count) {
-        m_Elements.push_back({GL_UNSIGNED_INT, count, false});
-        m_Stride += sizeof(GLuint);
-    }
-    template <> void Push<uint8_t>(uint32_t count) {
-        m_Elements.push_back({GL_UNSIGNED_BYTE, count, false});
-        m_Stride += sizeof(GLubyte);
+        uint8_t normalized = GL_FALSE;
+        uint32_t type = GL_FLOAT;
+
+        if (std::is_same<T, float>::value) {
+
+        } else if (std::is_same<T, uint32_t>::value) {
+            type = GL_UNSIGNED_INT;
+        } else if (std::is_same<T, uint8_t>::value) {
+            type = GL_UNSIGNED_BYTE;
+            normalized = GL_TRUE;
+        } else {
+            ASSERT(false);
+        }
+
+        m_Elements.push_back({type, count, normalized});
+        m_Stride += VertexBufferElement::GetSizeOfType(type);
     }
 
     inline const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
-    inline uint32_t GetStride() const { return m_Stride; }
+    inline unsigned int GetStride() const { return m_Stride; }
 };

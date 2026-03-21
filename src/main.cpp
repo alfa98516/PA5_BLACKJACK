@@ -8,7 +8,9 @@
 
 #include "IndexBuffer.hpp"
 #include "Renderer.hpp"
+#include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
+#include "VertexBufferLayout.hpp"
 
 /*
  * @param source: An address to a string object, needs to be alive when calling
@@ -100,15 +102,11 @@ int main() {
         GLCall(glGenVertexArrays(1, &vao));
         GLCall(glBindVertexArray(vao));
 
-        // VertexArray va;
+        VertexArray va;
         VertexBuffer vb(vectors, 4 * 2 * sizeof(float));
-        // va.AddBuffer();
-        // BufferLayout layout;
-        // layout.Push<float>(3);
-        // vs.AddLayout(layout);
-
-        GLCall(glEnableVertexAttribArray(0));
-        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+        va.AddBuffer(vb, layout);
 
         IndexBuffer ib(indices, 6);
 
@@ -141,9 +139,9 @@ int main() {
             GLCall(glUseProgram(shader));
             GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-            // va.Bind();
-
+            va.Bind();
             ib.Bind();
+
             GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
             if (r > 1.0f)
