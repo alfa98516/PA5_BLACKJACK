@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
@@ -33,4 +34,8 @@ class Shader {
     // set uniforms
 
     void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+    void SetUniform1f(const std::string& name, float value);
+    void SetUniform1i(const std::string& name, int32_t value);
 };
+
+std::filesystem::path getExecutableDir();

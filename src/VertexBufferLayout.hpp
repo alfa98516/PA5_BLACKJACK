@@ -1,5 +1,5 @@
 #pragma once
-#include "Renderer.hpp"
+#include "Macros.hpp"
 #include <cstdint>
 #include <glad/gl.h>
 #include <sys/types.h>

@@ -1,5 +1,5 @@
 #include "VertexArray.hpp"
-#include "Renderer.hpp"
+#include "Macros.hpp"
 #include "VertexBufferLayout.hpp"
 #include <cstdint>
 

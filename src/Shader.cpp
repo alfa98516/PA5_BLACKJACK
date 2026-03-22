@@ -1,7 +1,6 @@
 #include "Shader.hpp"
-#include "Renderer.hpp"
+#include "Macros.hpp"
 #include <cstdint>
-#include <filesystem>
 #include <fstream>
 #include <glad/gl.h>
 #include <iostream>
@@ -18,6 +17,16 @@ void Shader::Bind() const { GLCall(glUseProgram(m_RendererID)); }
 
 void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) {
     GLCall(glUniform4f(GetUniformLocation(name), v0, v1, v2, v3));
+}
+
+void Shader::SetUniform1f(const std::string& name, float value) {
+
+    GLCall(glUniform1f(GetUniformLocation(name), value));
+}
+
+void Shader::SetUniform1i(const std::string& name, int32_t value) {
+
+    GLCall(glUniform1i(GetUniformLocation(name), value));
 }
 
 int32_t Shader::GetUniformLocation(const std::string& name) {

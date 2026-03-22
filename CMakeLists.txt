@@ -17,6 +17,8 @@ set(SOURCES
     src/IndexBuffer.cpp
     src/VertexArray.cpp
     src/Shader.cpp
+    src/Texture.cpp
+    src/vendor/stb_image/stb_image.cpp
 )
 
 include(cmake/CPM.cmake)
@@ -33,10 +35,15 @@ target_include_directories(glad PUBLIC
 
 
 
+
+
+
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/
+    include/
 )
 
 find_package(OpenGL REQUIRED)
