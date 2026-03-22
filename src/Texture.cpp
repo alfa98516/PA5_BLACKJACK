@@ -11,7 +11,7 @@ Texture::Texture(const std::string& path)
 
     std::cout << fullPath << '\n';
 
-    m_LocalBuffer = stbi_load(fullPath.c_str(), &m_Width, &m_Height, &m_BPS, 4);
+    m_LocalBuffer = stbi_load(fullPath.string().c_str(), &m_Width, &m_Height, &m_BPS, 4);
     GLCall(glGenTextures(1, &m_RendererID));
     GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
 
