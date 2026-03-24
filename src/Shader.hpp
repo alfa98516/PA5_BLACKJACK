@@ -1,4 +1,5 @@
 #pragma once
+#include "glm/ext/matrix_float4x4.hpp"
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -36,6 +37,7 @@ class Shader {
     void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
     void SetUniform1f(const std::string& name, float value);
     void SetUniform1i(const std::string& name, int32_t value);
+    void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 };
 
 std::filesystem::path getExecutableDir();

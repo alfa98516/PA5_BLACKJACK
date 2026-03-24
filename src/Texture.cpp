@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 #include "Macros.hpp"
 #include "Shader.hpp"
-#include "vendor/stb_image/stb_image.h"
+#include "stb_image/stb_image.h"
 #include <filesystem>
 
 Texture::Texture(const std::string& path)

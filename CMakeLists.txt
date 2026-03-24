@@ -21,6 +21,8 @@ set(SOURCES
     src/vendor/stb_image/stb_image.cpp
 )
 
+
+
 include(cmake/CPM.cmake)
 
 CPMAddPackage("gh:glfw/glfw#3.4")
@@ -44,6 +46,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/
     include/
+    src/vendor/
 )
 
 find_package(OpenGL REQUIRED)

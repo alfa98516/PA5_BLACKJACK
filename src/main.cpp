@@ -13,6 +13,8 @@
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexBufferLayout.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 int main() {
     if (!glfwInit()) {
@@ -27,6 +29,8 @@ int main() {
 
     // glfw handles windows(not the os), they're freaky and different for every operating system.
     GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Window", nullptr, nullptr);
+
+    float aspectRatio = 640.0f / 480.0f;
 
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
@@ -62,12 +66,14 @@ int main() {
     // hence the scope
 
     {
-        float vectors[] = {
-            -0.5f, -0.5f, 0.0f, 0.0f, // 0
-            0.5f,  -0.5f, 1.0f, 0.0f, // 1
-            0.5f,  0.5f,  1.0f, 1.0f, // 2
-            -0.5f, 0.5f,  0.0f, 1.0f  // 3
+        float cardW = 300.0f; // pixels
+        float cardH = 420.0f; // maintains 0.714:1 ratio
 
+        float vectors[] = {
+            0.0f,  0.0f,  0.0f, 0.0f, // 0 bottom left
+            cardW, 0.0f,  1.0f, 0.0f, // 1 bottom right
+            cardW, cardH, 1.0f, 1.0f, // 2 top right
+            0.0f,  cardH, 0.0f, 1.0f  // 3 top left
         };
 
         uint32_t indices[] = {0, 1, 2, 2, 3, 0};
@@ -84,10 +90,12 @@ int main() {
 
         IndexBuffer ib(indices, 6);
 
+        glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);
+
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
-
         shader.SetUniform4f("u_color", 0.8f, 0.3f, 0.8f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", proj);
 
         Texture texture("res/textures/one-with-nothing.jpg");
         texture.Bind(0);
