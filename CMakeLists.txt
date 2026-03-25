@@ -18,7 +18,14 @@ set(SOURCES
     src/VertexArray.cpp
     src/Shader.cpp
     src/Texture.cpp
+    src/Deck.cpp
     src/vendor/stb_image/stb_image.cpp
+    src/vendor/imgui/imgui.cpp
+    src/vendor/imgui/imgui_draw.cpp
+    src/vendor/imgui/imgui_impl_glfw.cpp
+    src/vendor/imgui/imgui_impl_opengl3.cpp
+    src/vendor/imgui/imgui_tables.cpp
+    src/vendor/imgui/imgui_widgets.cpp
 )
 
 
