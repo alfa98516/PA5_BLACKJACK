@@ -1,10 +1,22 @@
-#include <cstdint>
+// Static libraries
+#include "Deck.hpp"
 #include <glad/gl.h>
-#include <sys/types.h>
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
 #include <GLFW/glfw3.h>
-#include <iostream>
 
+// Vendors (also just static libraries)
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+// Base C++ and/or C
+#include <cstdint>
+#include <iostream>
+#include <sys/types.h>
+
+// Self-written code
 #include "IndexBuffer.hpp"
 #include "Macros.hpp"
 #include "Renderer.hpp"
@@ -13,8 +25,9 @@
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexBufferLayout.hpp"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+const bool DEBUG = true;
+const int WINDOW_WIDTH = 960;
+const int WINDOW_HEIGHT = 540;
 
 int main() {
     if (!glfwInit()) {
@@ -28,9 +41,8 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // glfw handles windows(not the os), they're freaky and different for every operating system.
-    GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Window", nullptr, nullptr);
-
-    float aspectRatio = 640.0f / 480.0f;
+    GLFWwindow* window =
+        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL Window", nullptr, nullptr);
 
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
@@ -46,8 +58,8 @@ int main() {
     }
 
     // Turn on vsync
-    // side note: if you're using an NVIDIA graphics card, this might not work
-    // it gets completely overwritten with some NVIDIA drivers
+    // side note: if you're using an NVIDIA graphics card, this might not work.
+    // it gets completely overwritten by some NVIDIA drivers
     // Don't buy NVIDIA cards !
     glfwSwapInterval(1);
 
@@ -68,12 +80,13 @@ int main() {
     {
         float cardW = 300.0f; // pixels
         float cardH = 420.0f; // maintains 0.714:1 ratio
+        float x = 0.0f, y = 0.0f;
 
         float vectors[] = {
-            0.0f,  0.0f,  0.0f, 0.0f, // 0 bottom left
-            cardW, 0.0f,  1.0f, 0.0f, // 1 bottom right
-            cardW, cardH, 1.0f, 1.0f, // 2 top right
-            0.0f,  cardH, 0.0f, 1.0f  // 3 top left
+            -cardW / 2, -cardH / 2, 0.0f, 0.0f, // 0 bottom left
+            cardW / 2,  -cardH / 2, 1.0f, 0.0f, // 1 bottom right
+            cardW / 2,  cardH / 2,  1.0f, 1.0f, // 2 top right
+            -cardW / 2, cardH / 2,  0.0f, 1.0f  // 3 top left
         };
 
         uint32_t indices[] = {0, 1, 2, 2, 3, 0};
@@ -90,14 +103,20 @@ int main() {
 
         IndexBuffer ib(indices, 6);
 
-        glm::mat4 proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);
+        glm::mat4 proj =
+            glm::ortho(0.0f, (float)WINDOW_WIDTH, 0.0f, (float)WINDOW_HEIGHT, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+
+        glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
+        glm::vec4 result = proj * vp;
 
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
-        shader.SetUniform4f("u_color", 0.8f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", proj);
 
-        Texture texture("res/textures/one-with-nothing.jpg");
+        Deck deck = Deck(true);
+        Deck::Card c = deck.Draw();
+        std::cout << c.GetImagePath() << '\n';
+        Texture texture(c.GetImagePath());
         texture.Bind(0);
 
         shader.SetUniform1i("u_Texture", 0);
@@ -110,25 +129,71 @@ int main() {
 
         Renderer renderer;
 
-        float r = 0.0f;
-        float incr = 0.005f;
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        (void)io;
+
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui::StyleColorsDark();
+
+        ImGui_ImplOpenGL3_Init("#version 330");
+
+        float gap = (WINDOW_WIDTH - 2 * cardW) / 3.0f;
+        float centerA = gap + cardW / 2.0f;
+        float centerB = gap + cardW + gap + cardW / 2.0f;
+
+        float centerY = WINDOW_HEIGHT / 2.0f;
+
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.6f, 1.0f);
+        glm::vec3 translationA(centerA, centerY, 0);
+
+        glm::vec3 translationB(centerB, centerY, 0);
+
         while (!glfwWindowShouldClose(window)) {
 
             /* any rendering happens after this */
             renderer.Clear();
 
-            shader.Bind();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-            renderer.Draw(va, ib, shader);
-            if (r > 1.0f)
-                incr = -0.005f;
-            else if (r < 0.0f)
-                incr = 0.005f;
-            r += incr;
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+
+                glm::mat4 mvp = proj * view * model;
+
+                shader.Bind();
+                shader.SetUniformMat4f("u_MVP", mvp);
+
+                renderer.Draw(va, ib, shader);
+            }
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
+
+                glm::mat4 mvp = proj * view * model;
+                shader.Bind();
+                shader.SetUniformMat4f("u_MVP", mvp);
+
+                renderer.Draw(va, ib, shader);
+            }
+
+            if (DEBUG) {
+                ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, (float)WINDOW_WIDTH);
+                ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, (float)WINDOW_WIDTH);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                            1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
     }
 
     glfwTerminate();
