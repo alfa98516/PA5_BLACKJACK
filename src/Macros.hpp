@@ -8,22 +8,19 @@
 #include <signal.h>
 #include <unistd.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        raise(SIGTRAP);
+    if (!(x)) raise(SIGTRAP);
 #endif
 #ifdef __APPLE__
 #include <alloca.h>
 #include <mach-o/dyld.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        raise(SIGTRAP);
+    if (!(x)) raise(SIGTRAP);
 #endif
 #ifdef _WIN32
 #include <malloc.h>
 #include <windows.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x))                                                                                      \
-        __debugbreak();
+    if (!(x)) __debugbreak();
 #endif
 #define GLCall(x)                                                                                  \
     GLClearError();                                                                                \

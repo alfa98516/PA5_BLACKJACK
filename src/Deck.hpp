@@ -13,6 +13,9 @@ class Deck {
         Card(const Card& other);
         Card(Suits _suit, Rank _rank) : suit(_suit), rank(_rank), ImagePath(GetPath()) {}
 
+        bool operator==(const Card& other) const { return rank == other.GetRank(); }
+        bool operator==(Rank _rank) const { return _rank == rank; }
+
       private:
         Suits suit;
         Rank rank;

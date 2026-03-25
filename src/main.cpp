@@ -1,5 +1,4 @@
 // Static libraries
-#include "Deck.hpp"
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
 #include <GLFW/glfw3.h>
@@ -17,6 +16,7 @@
 #include <sys/types.h>
 
 // Self-written code
+#include "Deck.hpp"
 #include "IndexBuffer.hpp"
 #include "Macros.hpp"
 #include "Renderer.hpp"
@@ -25,6 +25,7 @@
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexBufferLayout.hpp"
+
 const bool DEBUG = true;
 const int WINDOW_WIDTH = 960;
 const int WINDOW_HEIGHT = 540;
@@ -114,10 +115,13 @@ int main() {
         shader.Bind();
 
         Deck deck = Deck(true);
-        Deck::Card c = deck.Draw();
-        std::cout << c.GetImagePath() << '\n';
-        Texture texture(c.GetImagePath());
-        texture.Bind(0);
+        Deck::Card c1 = deck.Draw();
+        Deck::Card c2 = deck.Draw();
+        std::cout << c1.GetImagePath() << '\n';
+        Texture textureA(c1.GetImagePath());
+        Texture textureB(c2.GetImagePath());
+        textureA.Bind(0);
+        textureB.Bind(0);
 
         shader.SetUniform1i("u_Texture", 0);
 

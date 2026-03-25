@@ -9,8 +9,6 @@ Texture::Texture(const std::string& path)
     stbi_set_flip_vertically_on_load(1);
     std::filesystem::path fullPath = getExecutableDir().parent_path() / m_Filepath;
 
-    std::cout << fullPath << '\n';
-
     m_LocalBuffer = stbi_load(fullPath.string().c_str(), &m_Width, &m_Height, &m_BPS, 4);
     GLCall(glGenTextures(1, &m_RendererID));
     GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
