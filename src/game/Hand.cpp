@@ -1,11 +1,15 @@
 #include "Hand.hpp"
-#include <atomic>
 #include <cstdint>
+#include <memory>
 
-Hand::Hand(std::shared_ptr<Deck> _deck) : deck(_deck), hand(), Ace(false), BlackJack(false) {
-    Deck::Card c1 = deck->Draw();
-    Deck::Card c2 = deck->Draw();
-    switch (c1.GetRank()) {
+Hand::Hand(std::shared_ptr<Deck> _deck)
+    : deck(_deck), hand(std::make_shared<std::vector<Deck::Card> >()), score(0), Ace(false),
+      BlackJack(false), stand(false) {
+    std::shared_ptr<Deck::Card> c1 = deck->Draw();
+    std::shared_ptr<Deck::Card> c2 = deck->Draw();
+    hand->push_back(*c1);
+    hand->push_back(*c2);
+    switch (c1->GetRank()) {
     case Rank::Ace:
         score += 11;
         Ace = true;
@@ -16,11 +20,11 @@ Hand::Hand(std::shared_ptr<Deck> _deck) : deck(_deck), hand(), Ace(false), Black
         score += 10;
         break;
     default:
-        score += (int8_t)c1.GetRank();
+        score += (int32_t)c1->GetRank();
         break;
     }
 
-    switch (c2.GetRank()) {
+    switch (c2->GetRank()) {
     case Rank::Ace:
 
         if (!Ace)
@@ -38,7 +42,7 @@ Hand::Hand(std::shared_ptr<Deck> _deck) : deck(_deck), hand(), Ace(false), Black
         score += 10;
         break;
     default:
-        score += (int8_t)c2.GetRank();
+        score += (int32_t)c2->GetRank();
         break;
     }
 
@@ -47,14 +51,16 @@ Hand::Hand(std::shared_ptr<Deck> _deck) : deck(_deck), hand(), Ace(false), Black
     }
 }
 
-const std::vector<Deck::Card>& Hand::GetHand() const { return hand; }
+const std::shared_ptr<std::vector<Deck::Card> > Hand::GetHand() const { return hand; }
 
-int8_t Hand::GetScore() const { return score; }
+int32_t Hand::GetScore() const { return score; }
 
-void Hand::Hit() {
-    if (score == -1) return;
-    Deck::Card c = deck->Draw();
-    switch (c.GetRank()) {
+void Hand::Stand() { stand = true; }
+
+const std::shared_ptr<Deck::Card> Hand::Hit() {
+    std::shared_ptr<Deck::Card> c = deck->Draw();
+    hand->push_back(*c);
+    switch (c->GetRank()) {
     case Rank::Ace:
 
         if (!Ace)
@@ -72,15 +78,18 @@ void Hand::Hit() {
         score += 10;
         break;
     default:
-        score += (int8_t)c.GetRank();
+        score += (int32_t)c->GetRank();
         break;
     }
 
     if (score > 21) {
         if (Ace) {
             score -= 10;
-            if (score <= 21) return;
+            if (score <= 21)
+                return c;
         }
         score = -1;
     }
+
+    return c;
 }

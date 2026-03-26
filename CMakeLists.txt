@@ -12,13 +12,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SOURCES
     src/main.cpp
-    src/Renderer.cpp
-    src/VertexBuffer.cpp
-    src/IndexBuffer.cpp
-    src/VertexArray.cpp
-    src/Shader.cpp
-    src/Texture.cpp
-    src/Deck.cpp
+    src/renderer/Renderer.cpp
+    src/renderer/VertexBuffer.cpp
+    src/renderer/IndexBuffer.cpp
+    src/renderer/VertexArray.cpp
+    src/renderer/Shader.cpp
+    src/renderer/Texture.cpp
+    src/core/Input.cpp
+    src/core/ResourceManager.cpp
+    src/game/Deck.cpp
+    src/game/Hand.cpp
+    src/game/Game.cpp
     src/vendor/stb_image/stb_image.cpp
     src/vendor/imgui/imgui.cpp
     src/vendor/imgui/imgui_draw.cpp

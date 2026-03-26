@@ -1,5 +1,6 @@
 #pragma once
-#include "Macros.hpp"
+#include <cstdint>
+#include <string>
 
 class Texture {
     uint32_t m_RendererID;

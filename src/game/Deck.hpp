@@ -1,8 +1,23 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 enum struct Suits { Spade, Heart, Club, Diamond };
-enum struct Rank { Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King };
+enum struct Rank {
+    Ace = 1,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King
+};
 
 class Deck {
   public:
@@ -15,6 +30,7 @@ class Deck {
 
         bool operator==(const Card& other) const { return rank == other.GetRank(); }
         bool operator==(Rank _rank) const { return _rank == rank; }
+        void PrintCard() const;
 
       private:
         Suits suit;
@@ -25,9 +41,9 @@ class Deck {
 
     Deck(bool shuffle = false);
     void Shuffle();
-    Card Draw();
-    Card Peek() const;
+    std::shared_ptr<Card> Draw();
+    std::shared_ptr<Card> Peek() const;
 
   private:
-    std::vector<Card> deck;
+    std::vector<std::shared_ptr<Card> > deck;
 };

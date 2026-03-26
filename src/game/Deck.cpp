@@ -1,14 +1,16 @@
 #include "Deck.hpp"
-#include "Macros.hpp"
 #include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <memory>
 #include <random>
 
 std::random_device rd;
 
 Deck::Deck(bool shuffle) : deck() {
-    for (int _rank = 0; _rank < 13; ++_rank) {
+    for (int _rank = 1; _rank < 14; ++_rank) {
         for (int _suit = 0; _suit < 4; ++_suit) {
-            deck.push_back(Card((Suits)_suit, (Rank)_rank));
+            deck.push_back(std::make_shared<Card>((Suits)_suit, (Rank)_rank));
         }
     }
     if (shuffle) {
@@ -16,18 +18,63 @@ Deck::Deck(bool shuffle) : deck() {
     }
 }
 
-Deck::Card Deck::Draw() {
-    Card card = deck.back();
+std::shared_ptr<Deck::Card> Deck::Draw() {
+    std::shared_ptr<Deck::Card> card = deck.back();
     deck.pop_back();
     return card;
 }
 
 void Deck::Shuffle() { std::shuffle(deck.begin(), deck.end(), std::mt19937(rd())); }
 
-Deck::Card Deck::Peek() const { return deck.back(); }
+std::shared_ptr<Deck::Card> Deck::Peek() const { return deck.back(); }
 
 Deck::Card::Card(const Card& other)
     : suit(other.GetSuit()), rank(other.GetRank()), ImagePath(other.GetImagePath()) {}
+
+void Deck::Card::PrintCard() const {
+    switch (rank) {
+
+    case Rank::Ace:
+        std::cout << "Ace of ";
+        break;
+    case Rank::Two:
+    case Rank::Three:
+    case Rank::Four:
+    case Rank::Five:
+    case Rank::Six:
+    case Rank::Seven:
+    case Rank::Eight:
+    case Rank::Nine:
+    case Rank::Ten:
+        std::cout << (int)rank << " of ";
+        break;
+    case Rank::Jack:
+        std::cout << "Jack of ";
+        break;
+    case Rank::Queen:
+        std::cout << "Queen of ";
+        break;
+    case Rank::King:
+        std::cout << "King of ";
+        break;
+    }
+
+    switch (suit) {
+
+    case Suits::Spade:
+        std::cout << "Spades\n";
+        break;
+    case Suits::Heart:
+        std::cout << "Hearts\n";
+        break;
+    case Suits::Club:
+        std::cout << "Clubs\n";
+        break;
+    case Suits::Diamond:
+        std::cout << "Diamonds\n";
+        break;
+    }
+}
 
 std::string Deck::Card::GetPath() const {
     std::string _ImagePath = "res/textures/cards/";
@@ -73,7 +120,7 @@ std::string Deck::Card::GetPath() const {
         break;
     default:
         std::cout << "Invalid Rank !\n";
-        ASSERT(false);
+        assert(false);
     }
 
     _ImagePath += "_of_";
@@ -93,7 +140,7 @@ std::string Deck::Card::GetPath() const {
         break;
     default:
         std::cout << "Invalid Suit !\n";
-        ASSERT(false);
+        assert(false);
     }
     _ImagePath += ".png";
     return _ImagePath;

@@ -1,26 +1,31 @@
 #pragma once
 #include <sys/types.h>
+#ifndef NO_GL
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#endif
 #ifdef __linux__
 #include <alloca.h>
 #include <signal.h>
 #include <unistd.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x)) raise(SIGTRAP);
+    if (!(x))                                                                                      \
+        raise(SIGTRAP);
 #endif
 #ifdef __APPLE__
 #include <alloca.h>
 #include <mach-o/dyld.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x)) raise(SIGTRAP);
+    if (!(x))                                                                                      \
+        raise(SIGTRAP);
 #endif
 #ifdef _WIN32
 #include <malloc.h>
 #include <windows.h>
 #define ASSERT(x)                                                                                  \
-    if (!(x)) __debugbreak();
+    if (!(x))                                                                                      \
+        __debugbreak();
 #endif
 #define GLCall(x)                                                                                  \
     GLClearError();                                                                                \
