@@ -18,6 +18,7 @@ set(SOURCES
     src/renderer/VertexArray.cpp
     src/renderer/Shader.cpp
     src/renderer/Texture.cpp
+    src/renderer/VertexBufferLayout.cpp
     src/core/Input.cpp
     src/core/ResourceManager.cpp
     src/game/Deck.cpp

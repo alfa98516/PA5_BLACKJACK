@@ -15,5 +15,7 @@ class ResourceManager {
         static ResourceManager instance;
         return instance;
     }
+
+    void Shutdown();
     std::shared_ptr<Texture> Get(const std::string& path);
 };

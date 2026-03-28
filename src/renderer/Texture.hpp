@@ -1,7 +1,7 @@
 #pragma once
+#include "Texture.hpp"
 #include <cstdint>
 #include <string>
-
 class Texture {
     uint32_t m_RendererID;
     std::string m_Filepath;

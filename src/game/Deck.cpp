@@ -1,4 +1,5 @@
 #include "Deck.hpp"
+#include "renderer/Sprite.hpp"
 #include <algorithm>
 #include <cassert>
 #include <iostream>

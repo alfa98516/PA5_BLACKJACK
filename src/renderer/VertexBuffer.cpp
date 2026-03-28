@@ -1,5 +1,5 @@
 #include "VertexBuffer.hpp"
-#include "Renderer.hpp"
+#include "Macros.hpp"
 #include <cstdint>
 
 VertexBuffer::VertexBuffer(const void* data, uint32_t size) {

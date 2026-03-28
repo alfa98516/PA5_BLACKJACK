@@ -2,12 +2,12 @@
 #include "Macros.hpp"
 unsigned int VertexBufferElement::GetSizeOfType(uint32_t type) {
     switch (type) {
-    case GL_FLOAT:
-        return 4;
-    case GL_UNSIGNED_INT:
-        return 4;
-    case GL_UNSIGNED_BYTE:
-        return 1;
+        case GL_FLOAT:
+            return 4;
+        case GL_UNSIGNED_INT:
+            return 4;
+        case GL_UNSIGNED_BYTE:
+            return 1;
     }
     ASSERT(false);
     return 0;
@@ -19,21 +19,24 @@ unsigned int VertexBufferElement::GetSizeOfType(uint32_t type) {
  *
  */
 template <typename T> void VertexBufferLayout::Push(unsigned int count) {
-
     uint8_t normalized = GL_FALSE;
     uint32_t type = GL_FLOAT;
 
-    if (std::is_same<T, float>::value) {
-
-    } else if (std::is_same<T, uint32_t>::value) {
+    if constexpr (std::is_same_v<T, float>) {
+        // nothing
+    } else if constexpr (std::is_same_v<T, uint32_t>) {
         type = GL_UNSIGNED_INT;
-    } else if (std::is_same<T, uint8_t>::value) {
+    } else if constexpr (std::is_same_v<T, uint8_t>) {
         type = GL_UNSIGNED_BYTE;
         normalized = GL_TRUE;
     } else {
-        ASSERT(false);
+        static_assert(false, "Unsupported type for VertexBufferLayout::Push");
     }
 
     m_Elements.push_back({type, count, normalized});
     m_Stride += VertexBufferElement::GetSizeOfType(type) * count;
 }
+// Explicit instantiations for the types we use
+template void VertexBufferLayout::Push<float>(unsigned int);
+template void VertexBufferLayout::Push<uint32_t>(unsigned int);
+template void VertexBufferLayout::Push<uint8_t>(unsigned int);

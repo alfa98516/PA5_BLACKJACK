@@ -2,6 +2,11 @@
 #include <memory>
 #include <string>
 #include <vector>
+constexpr int CARD_WIDTH = 50;
+constexpr int CARD_HEIGHT = 70;
+
+struct Sprite;
+
 enum struct Suits { Spade, Heart, Club, Diamond };
 enum struct Rank {
     Ace = 1,
@@ -46,4 +51,9 @@ class Deck {
 
   private:
     std::vector<std::shared_ptr<Card> > deck;
+};
+
+struct CardEntity {
+    std::shared_ptr<Deck::Card> card;
+    Sprite& sprite;
 };

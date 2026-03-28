@@ -12,3 +12,5 @@ std::shared_ptr<Texture> ResourceManager::Get(const std::string& path) {
     TextureCache[path] = t;
     return t;
 }
+
+void ResourceManager::Shutdown() { TextureCache.clear(); }

@@ -1,23 +1,15 @@
-#include "core/ResourceManager.hpp"
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "renderer/Renderer.hpp"
+
 #include <glad/gl.h>
-#include <type_traits>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <memory>
 
 #include "core/Input.hpp"
 #include "core/ResourceManager.hpp"
-#include "renderer/Sprite.hpp"
-#include "renderer/Texture.hpp"
-
-#define WINDOW_WIDTH 960
-#define WINDOW_HEIGHT 540
-#define DEBUG true
+#include "game/Game.hpp"
+#include "renderer/Macros.hpp"
+#include "renderer/Renderer.hpp"
 
 int main(int argc, char* argv[]) {
 
@@ -57,71 +49,30 @@ int main(int argc, char* argv[]) {
     // debug
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
 
-    float vertecies[]{-0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, 1.0f, 0.0f,
-                      0.5f,  0.5f,  1.0f, 1.0f, -0.5f, 0.5f,  0.0f, 1.0f};
-
-    uint32_t indices[] = {0, 1, 2, 2, 3, 0};
-
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    VertexArray va;
-    VertexBuffer vb(vertecies, 4 * 4 * sizeof(float));
-    VertexBufferLayout layout;
-    layout.Push<float>(2);
-    layout.Push<float>(2);
-    va.AddBuffer(vb, layout);
+    {
+        Input& input = Input::Instance();
+        input.SetWindow(window);
+        input.RegisterCallbacks();
+        ResourceManager& resourceManager = ResourceManager::Instance();
 
-    IndexBuffer ib(indices, 6);
+        Renderer& renderer = Renderer::Instance();
 
-    glm::mat4 proj = glm::ortho(0.0f, (float)WINDOW_WIDTH, 0.0f, (float)WINDOW_HEIGHT, -1.0f, 1.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+        Game game = Game(renderer, resourceManager);
 
-    glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
-    glm::vec4 result = proj * vp;
+        while (!glfwWindowShouldClose(window)) {
+            renderer.Clear();
+            input.Update();
+            game.UpdateState();
 
-    Shader shader("res/shaders/basic.shader");
-    shader.Bind();
-
-    Renderer renderer;
-    ResourceManager& resourceManager = ResourceManager::Instance();
-    Input& input = Input::Instance();
-    input.SetWindow(window);
-    int clickCount = 0;
-    input.RegisterCallbacks();
-    std::shared_ptr<Texture> button_unpressed =
-        resourceManager.Get("res/textures/ui/button_unpressed.png");
-    std::shared_ptr<Texture> button_pressed =
-        resourceManager.Get("res/textures/ui/buttonm_pressed.png");
-
-    shader.SetUniform1i("u_Texture", 0);
-    va.Unbind();
-    vb.Unbind();
-    ib.Unbind();
-
-    shader.Unbind();
-
-    Sprite button{glm::vec2{100, 200}, glm::vec2{100, 100}, nullptr, true};
-
-    while (!glfwWindowShouldClose(window)) {
-        input.Update();
-        if (input.WasClicked()) {
-            button_pressed->Bind(0);
-            button.texture = button_pressed;
-            clickCount++;
-            std::cout << "Right button clicked: " << clickCount << " at position: " << "("
-                      << input.GetPosition().x << ", " << input.GetPosition().y << ")\n";
-            button_pressed->Unbind();
+            glfwSwapBuffers(window);
+            glfwPollEvents();
         }
-
-        button_unpressed->Bind(0);
-        button.texture = button_unpressed;
-        renderer.DrawSprite(button, proj, va, ib, shader);
-        shader.Bind();
-        button_unpressed->Unbind();
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        renderer.Shutdown();
+        resourceManager.Shutdown();
     }
 
     glfwTerminate();
+    return 0;
 }

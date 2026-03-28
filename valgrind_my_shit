@@ -1,0 +1,2 @@
+#!/bin/env bash
+valgrind --suppressions=mesa.supp --leak-check=full --show-leak-kinds=all ./build/FORC_OpenGL_Blackjack >valgrind.txt 2>&1

@@ -33,6 +33,10 @@
     ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 #include <iostream>
 
+constexpr bool DEBUG = true;
+constexpr int WINDOW_WIDTH = 960;
+constexpr int WINDOW_HEIGHT = 540;
+
 static bool GLLogCall(const char* function, const char* file, int line) {
     while (GLenum error = glGetError()) {
         std::cout << "[OpenGL Error] (" << std::hex << error << ")" << " in: " << function << " "

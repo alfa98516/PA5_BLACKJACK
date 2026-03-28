@@ -1,5 +1,5 @@
 #include "IndexBuffer.hpp"
-#include "Renderer.hpp"
+#include "Macros.hpp"
 #include <cstdint>
 
 IndexBuffer::IndexBuffer(const uint32_t* data, uint32_t count) : m_Count(count) {
