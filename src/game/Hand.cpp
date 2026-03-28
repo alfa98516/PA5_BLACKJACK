@@ -5,45 +5,47 @@
 Hand::Hand(std::shared_ptr<Deck> _deck)
     : deck(_deck), hand(std::make_shared<std::vector<Deck::Card> >()), score(0), Ace(false),
       BlackJack(false), stand(false) {
-    std::shared_ptr<Deck::Card> c1 = deck->Draw();
-    std::shared_ptr<Deck::Card> c2 = deck->Draw();
+    std::shared_ptr<Deck::Card> c1 =
+        deck->Draw(); // std::make_shared<Deck::Card>(Suits::Club, Rank::Ace);
+    std::shared_ptr<Deck::Card> c2 =
+        deck->Draw(); // std::make_shared<Deck::Card>(Suits::Spade, Rank::Ace);
     hand->push_back(*c1);
     hand->push_back(*c2);
     switch (c1->GetRank()) {
-    case Rank::Ace:
-        score += 11;
-        Ace = true;
-        break;
-    case Rank::Jack:
-    case Rank::Queen:
-    case Rank::King:
-        score += 10;
-        break;
-    default:
-        score += (int32_t)c1->GetRank();
-        break;
+        case Rank::Ace:
+            score += 11;
+            Ace = true;
+            break;
+        case Rank::Jack:
+        case Rank::Queen:
+        case Rank::King:
+            score += 10;
+            break;
+        default:
+            score += (int32_t)c1->GetRank();
+            break;
     }
 
     switch (c2->GetRank()) {
-    case Rank::Ace:
+        case Rank::Ace:
 
-        if (!Ace)
-            score += 11;
-        else {
-            score += 1;
+            if (!Ace)
+                score += 11;
+            else {
+                score += 1;
+                break;
+            }
+
+            Ace = true;
             break;
-        }
-
-        Ace = true;
-        break;
-    case Rank::Jack:
-    case Rank::Queen:
-    case Rank::King:
-        score += 10;
-        break;
-    default:
-        score += (int32_t)c2->GetRank();
-        break;
+        case Rank::Jack:
+        case Rank::Queen:
+        case Rank::King:
+            score += 10;
+            break;
+        default:
+            score += (int32_t)c2->GetRank();
+            break;
     }
 
     if (Ace && score == 21) {
@@ -61,30 +63,31 @@ const std::shared_ptr<Deck::Card> Hand::Hit() {
     std::shared_ptr<Deck::Card> c = deck->Draw();
     hand->push_back(*c);
     switch (c->GetRank()) {
-    case Rank::Ace:
+        case Rank::Ace:
 
-        if (!Ace)
-            score += 11;
-        else {
-            score += 1;
+            if (!Ace)
+                score += 11;
+            else {
+                score += 1;
+                break;
+            }
+
+            Ace = true;
             break;
-        }
-
-        Ace = true;
-        break;
-    case Rank::Jack:
-    case Rank::Queen:
-    case Rank::King:
-        score += 10;
-        break;
-    default:
-        score += (int32_t)c->GetRank();
-        break;
+        case Rank::Jack:
+        case Rank::Queen:
+        case Rank::King:
+            score += 10;
+            break;
+        default:
+            score += (int32_t)c->GetRank();
+            break;
     }
 
     if (score > 21) {
         if (Ace) {
             score -= 10;
+            Ace = false;
             if (score <= 21)
                 return c;
         }
