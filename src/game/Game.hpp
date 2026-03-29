@@ -55,17 +55,21 @@ class Game {
     std::shared_ptr<Deck> GameDeck;
     std::shared_ptr<Hand> PlayerHand;
     std::shared_ptr<Hand> DealerHand;
+    const int ActionLength = 200;
+    int ActionCounter = 0; // much like the counter on the buttons, designed to add waiting time.
     std::vector<Sprite> PlayerCards;
     std::vector<Sprite> DealerCards;
     Sprite table;
     Sprite BackCard;
     GameState CurrentState;
-    void UpdateDealing();
+    Action UpdateDealing();
     Action UpdatePlayerTurn();
     void PlayerHit();
+    void DealerHit();
     Action UpdateDealerTurn();
     void UpdateRoundEnd();
     void Render();
+
     void RenderButtons();
     void RenderCards(bool);
 

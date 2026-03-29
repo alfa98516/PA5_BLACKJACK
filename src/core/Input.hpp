@@ -28,4 +28,6 @@ class Input {
     void Update();
     const glm::dvec2& GetPosition() const;
     bool WasClicked();
+    bool PeekClicked() const;
+    void ConsumeClick();
 };

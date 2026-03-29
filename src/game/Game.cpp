@@ -21,13 +21,20 @@ Game::Game(Renderer& r, ResourceManager& rm)
     Sprite hitPressedSprite = {glm::vec2{100, 100}, glm::vec2{150, 75},
                                resourceManager.Get("res/textures/ui/hit_pressed.png")};
 
-    Button hit = Button(hitPressedSprite, hitSprite, Action::HIT);
+    Button hit = {hitPressedSprite, hitSprite, Action::HIT};
+
+    Sprite standSprite = {glm::vec2{860, 100}, glm::vec2{100, 72},
+                          resourceManager.Get("res/textures/ui/stand_unpressed.png")};
+    Sprite standPressedSprite = {glm::vec2{860, 100}, glm::vec2{150, 75},
+                                 resourceManager.Get("res/textures/ui/stand_pressed.png")};
+    Button stand = {standPressedSprite, standSprite, Action::STAND};
+    buttons[GameState::DEALING].push_back(hit);
+    buttons[GameState::DEALING].push_back(stand);
+    buttons[GameState::PLAYER_TURN].push_back(hit);
+    buttons[GameState::PLAYER_TURN].push_back(stand);
+
     table = {glm::vec2{WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2}, glm::vec2{WINDOW_WIDTH, WINDOW_HEIGHT},
              resourceManager.Get("res/textures/ui/table.png")};
-    buttons[GameState::DEALING].push_back(hit);
-    buttons[GameState::DEALING]; // TODO: make support for stand button lowkey
-    buttons[GameState::PLAYER_TURN].push_back(hit);
-
     PlayerCards.push_back({glm::vec2{0, 0}, glm::vec2{CARD_WIDTH, CARD_HEIGHT},
                            resourceManager.Get(PlayerHand->GetHand()->front().GetImagePath())});
     PlayerCards.push_back({glm::vec2{0, 0}, glm::vec2{CARD_WIDTH, CARD_HEIGHT},
@@ -53,15 +60,17 @@ void Game::UpdateState() {
             if (state == Action::HIT) {
                 PlayerHit();
 
-            } else if (state == Action::STAND)
+            } else if (state == Action::STAND) {
                 CurrentState = GameState::DEALER_TURN;
+                ActionCounter = ActionLength;
+            }
             break;
         }
 
         case GameState::DEALER_TURN: {
             Action state = UpdateDealerTurn();
             if (state == Action::HIT) {
-                DealerHand->Hit();
+                DealerHit();
             } else if (state == Action::STAND) {
                 CurrentState = GameState::ROUND_END;
             }
@@ -75,6 +84,7 @@ void Game::UpdateState() {
             b.Update();
         }
     }
+    InputHandler.ConsumeClick();
 }
 
 void Game::PlayerHit() {
@@ -84,7 +94,17 @@ void Game::PlayerHit() {
                            resourceManager.Get(c->GetImagePath())});
 }
 
-void Game::UpdateDealing() { Render(); }
+void Game::DealerHit() {
+    auto c = DealerHand->Hit();
+
+    DealerCards.push_back({glm::vec2{0, 0}, glm::vec2{CARD_WIDTH, CARD_HEIGHT},
+                           resourceManager.Get(c->GetImagePath())});
+}
+
+Action Game::UpdateDealing() {
+    Render();
+    return Action::WAIT;
+}
 
 Action Game::UpdatePlayerTurn() {
     Render();
@@ -100,6 +120,23 @@ Action Game::UpdatePlayerTurn() {
     return Action::WAIT;
 }
 
+Action Game::UpdateDealerTurn() {
+    Render();
+    if (ActionCounter) {
+        ActionCounter--;
+        return Action::WAIT;
+    }
+    ActionCounter = ActionLength;
+    if (DealerHand->IsBust())
+        return Action::BUST;
+
+    if (DealerHand->GetScore() >= 17) {
+        return Action::STAND;
+    }
+
+    return Action::HIT;
+}
+
 Button::Button(Sprite pressed, Sprite unpressed, Action a)
     : buttonUnpressed(unpressed), action(a), buttonPressed(pressed) {}
 const Sprite& Button::GetUnpressed() const { return buttonUnpressed; }
@@ -109,11 +146,11 @@ Action Button::WasHit() {
     if (WasHitThisFrame) {
         return action;
     }
-    int x = buttonUnpressed.position.x;
-    int y = buttonUnpressed.position.y;
-    int worldY = WINDOW_HEIGHT - y;
+    int x = buttonUnpressed.position.x - buttonUnpressed.size.x / 2;
+    int y = buttonUnpressed.position.y - buttonUnpressed.size.y / 2;
+    int worldY = WINDOW_HEIGHT - buttonUnpressed.position.y - buttonUnpressed.size.y / 2;
 
-    if (input.WasClicked()) {
+    if (input.PeekClicked()) {
         glm::vec2 pos = input.GetPosition();
         std::cout << "(" << pos.x << ", " << pos.y << ")\n";
         if ((pos.x >= x && pos.x <= x + buttonUnpressed.size.x) &&
@@ -136,12 +173,17 @@ void Game::Render() {
         case GameState::DEALING: {
             RenderCards(false);
             RenderCards(true);
+            break;
         }
 
         case GameState::PLAYER_TURN:
             RenderCards(false);
             RenderCards(true);
+            break;
         case GameState::DEALER_TURN:
+            RenderCards(false);
+            RenderCards(true);
+            break;
         case GameState::ROUND_END:
             break;
     }
@@ -193,5 +235,3 @@ void Game::RenderCards(bool dealer = false) {
         }
     }
 }
-
-Action Game::UpdateDealerTurn() { return Action::WAIT; }
