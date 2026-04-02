@@ -19,7 +19,6 @@ class Renderer {
     IndexBuffer m_ibo;
     VertexBufferLayout m_layout;
     glm::mat4 m_proj;
-
     static std::unique_ptr<Renderer> instance;
     Shader m_defaultShader;
     Renderer();

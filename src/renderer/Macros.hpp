@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <sys/types.h>
 #ifndef NO_GL
 #define GLFW_INCLUDE_NONE // tells GLFW not to include any OpenGL headers itself
@@ -49,4 +50,19 @@ static bool GLLogCall(const char* function, const char* file, int line) {
 static void GLClearError() {
     while (glGetError() != GL_NO_ERROR)
         ;
+}
+
+static std::filesystem::path getExecutableDir() {
+#ifdef _WIN32
+    char path[MAX_PATH];
+    GetModuleFileNameA(nullptr, path, MAX_PATH);
+    return std::filesystem::path(path).parent_path();
+#elif __linux__
+    return std::filesystem::canonical("/proc/self/exe").parent_path();
+#elif __APPLE__
+    char path[PATH_MAX];
+    uint32_t size = sizeof(path);
+    _NSGetExecutablePath(path, &size);
+    return std::filesystem::canonical(path).parent_path();
+#endif
 }

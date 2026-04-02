@@ -1,7 +1,6 @@
 #pragma once
 #include "glm/ext/matrix_float4x4.hpp"
 #include <cstdint>
-#include <filesystem>
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
@@ -39,5 +38,3 @@ class Shader {
     void SetUniform1i(const std::string& name, int32_t value) const;
     void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) const;
 };
-
-std::filesystem::path getExecutableDir();

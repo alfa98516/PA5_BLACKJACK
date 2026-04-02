@@ -51,21 +51,6 @@ int32_t Shader::GetUniformLocation(const std::string& name) const {
 
 void Shader::Unbind() const { GLCall(glUseProgram(0)); }
 
-std::filesystem::path getExecutableDir() {
-#ifdef _WIN32
-    char path[MAX_PATH];
-    GetModuleFileNameA(nullptr, path, MAX_PATH);
-    return std::filesystem::path(path).parent_path();
-#elif __linux__
-    return std::filesystem::canonical("/proc/self/exe").parent_path();
-#elif __APPLE__
-    char path[PATH_MAX];
-    uint32_t size = sizeof(path);
-    _NSGetExecutablePath(path, &size);
-    return std::filesystem::canonical(path).parent_path();
-#endif
-}
-
 ShaderProgramSource Shader::ParseShader(const std::string& file) {
 
     std::filesystem::path fullPath = getExecutableDir().parent_path() / file;

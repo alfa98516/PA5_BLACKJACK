@@ -46,6 +46,12 @@ struct Button {
                        // I can't turn on vsync for Nvidia cards
 };
 
+/*
+ * @brief the main menu is esentially just a button with an overloaded WasHit function.
+ *
+ */
+struct MainMenu : public Button {};
+
 class Game {
     GLFWwindow* window;
     Input& InputHandler = Input::Instance();

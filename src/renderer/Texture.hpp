@@ -1,7 +1,7 @@
 #pragma once
-#include "Texture.hpp"
 #include <cstdint>
 #include <string>
+
 class Texture {
     uint32_t m_RendererID;
     std::string m_Filepath;
@@ -9,7 +9,12 @@ class Texture {
     int32_t m_Width, m_Height, m_BPS;
 
   public:
+    // Intended for image files
     Texture(const std::string& path);
+
+    // intended for glyph bitmaps
+    Texture(const uint8_t*);
+
     ~Texture();
 
     void Bind(uint32_t slot) const;

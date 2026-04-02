@@ -27,6 +27,9 @@ Texture::Texture(const std::string& path)
     }
 }
 
+Texture::Texture(const char* glyph)
+    : m_RendererID(0), m_Filepath(""), m_LocalBuffer(nullptr), m_Width(0), m_Height(0), m_BPS(0) {}
+
 Texture::~Texture() { GLCall(glDeleteTextures(1, &m_RendererID)); }
 
 void Texture::Bind(uint32_t slot) const {

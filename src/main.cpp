@@ -1,4 +1,3 @@
-
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -45,6 +44,9 @@ int main(int argc, char* argv[]) {
     // it gets completely overwritten by some NVIDIA drivers
     // Don't buy NVIDIA cards !
     glfwSwapInterval(1);
+
+    // disable byte-alignment restriction
+    GLCall(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 
     // debug
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
