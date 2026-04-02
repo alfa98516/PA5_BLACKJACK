@@ -16,5 +16,5 @@ class TextRenderer {
 
   public:
     void Render(const std::string&, glm::vec2, uint32_t);
-    TextRenderer& Instance();
+    static TextRenderer& Instance();
 };

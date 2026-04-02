@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
     // Turn on vsync
     // side note: if you're using an NVIDIA graphics card, this might not work.
     // it gets completely overwritten by some NVIDIA drivers
-    // Don't buy NVIDIA cards !
+    // So if you happen to notice that the game speed is unusually high, and you're using an NVIDIA
+    // card, thats why. Don't buy NVIDIA cards !
     glfwSwapInterval(1);
 
     // disable byte-alignment restriction

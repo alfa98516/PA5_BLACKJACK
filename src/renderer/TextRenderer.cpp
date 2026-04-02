@@ -1,6 +1,8 @@
 #include "renderer/TextRenderer.hpp"
+#include "freetype/freetype.h"
 #include "renderer/Macros.hpp"
 #include "renderer/Renderer.hpp"
+#include "renderer/Sprite.hpp"
 #include "renderer/Texture.hpp"
 #include <iostream>
 
@@ -12,8 +14,8 @@ TextRenderer::TextRenderer() {
         exit(error);
     }
 
-    std::filesystem::path fullPath = getExecutableDir() / "res/fonts/Blackjack.ttf";
-    error = FT_New_Face(lib, fullPath.parent_path().string().c_str(), 0, &font);
+    std::filesystem::path fullPath = getExecutableDir().parent_path() / "res/fonts/BlackjackV2.ttf";
+    error = FT_New_Face(lib, fullPath.string().c_str(), 0, &font);
     if (error == FT_Err_Unknown_File_Format) {
         std::cerr << "File format unknown\n";
         exit(error);
@@ -28,8 +30,12 @@ TextRenderer::TextRenderer() {
  * means dont use those. You can implement those youreself if you like.
  * @param text: The text were rendering.
  * @param pos: The x, y coordinates of the text.
+ * @param em: The em size of the glyphs
  */
 void TextRenderer::Render(const std::string& text, glm::vec2 pos, uint32_t em) {
+
+    Renderer& rend = Renderer::Instance();
+
     FT_Error error = FT_Set_Pixel_Sizes(font, 0, em);
     if (error) {
         std::cerr << "Setting em failed\n";
@@ -42,8 +48,19 @@ void TextRenderer::Render(const std::string& text, glm::vec2 pos, uint32_t em) {
             std::cerr << "Error loading char: " << c << '\n';
             exit(error);
         }
+        error = FT_Render_Glyph(font->glyph, FT_RENDER_MODE_NORMAL);
 
-        font->glyph->bitmap;
+        if (error) {
+            std::cerr << "Error rendering glyph: " << c << '\n';
+            exit(error);
+        }
+
+        std::shared_ptr<Texture> glyph = std::make_shared<Texture>(
+            font->glyph->bitmap.buffer, font->glyph->bitmap.width, font->glyph->bitmap.rows);
+        Sprite sp{pos, glm::vec2{font->glyph->bitmap.width, font->glyph->bitmap.rows}, glyph, true};
+
+        rend.DrawGlyph(sp);
+        pos.x += font->glyph->advance.x >> 6;
     }
 }
 

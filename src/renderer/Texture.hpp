@@ -13,7 +13,7 @@ class Texture {
     Texture(const std::string& path);
 
     // intended for glyph bitmaps
-    Texture(const uint8_t*);
+    Texture(uint8_t*, uint32_t, uint32_t);
 
     ~Texture();
 

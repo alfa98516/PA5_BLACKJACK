@@ -12,12 +12,15 @@ class Hand {
     bool stand;
 
   public:
-    bool IsBlackJack() const { return BlackJack; }
     Hand(std::shared_ptr<Deck> _deck);
+    Hand(std::shared_ptr<Deck::Card> c1, std::shared_ptr<Deck::Card> c2,
+         std::shared_ptr<Deck> _deck);
     const std::shared_ptr<std::vector<Deck::Card> > GetHand() const;
     int32_t GetScore() const;
     const std::shared_ptr<Deck::Card> Hit();
     void Stand();
+
+    bool IsBlackJack() const { return BlackJack; }
     bool IsBust() const { return score == -1; }
     bool IsStand() const { return stand; }
     bool operator==(const Hand& other) const { return score == other.GetScore(); }

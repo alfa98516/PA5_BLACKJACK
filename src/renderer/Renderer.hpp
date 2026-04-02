@@ -21,6 +21,7 @@ class Renderer {
     glm::mat4 m_proj;
     static std::unique_ptr<Renderer> instance;
     Shader m_defaultShader;
+    Shader m_glyphShader;
     Renderer();
 
   public:
@@ -32,4 +33,5 @@ class Renderer {
     void Draw() const;
     void Clear() const;
     void DrawSprite(const Sprite& sprite) const;
+    void DrawGlyph(const Sprite& sprite);
 };
