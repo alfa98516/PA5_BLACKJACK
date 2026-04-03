@@ -280,7 +280,6 @@ Action Button::WasHit() {
         glm::vec2 pos = input.GetPosition();
         if ((pos.x >= x && pos.x <= x + buttonUnpressed.size.x) &&
             (pos.y >= worldY && pos.y <= worldY + buttonUnpressed.size.y)) {
-            std::cout << "my shit pressed\n";
             WasHitThisFrame = true;
             return action;
         }

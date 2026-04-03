@@ -62,10 +62,8 @@ Hand::Hand(std::shared_ptr<Deck::Card> c1, std::shared_ptr<Deck::Card> c2,
            std::shared_ptr<Deck> _deck)
     : deck(_deck), score(0), Ace(false), BlackJack(false), stand(false),
       hand(std::make_shared<std::vector<Deck::Card> >()) {
-    std::cout << "It might be the hand initializer?\n";
     hand->push_back(*c1);
     hand->push_back(*c2);
-    std::cout << "it is not\n";
 
     switch (c1->GetRank()) {
         case Rank::Ace:
@@ -105,10 +103,8 @@ Hand::Hand(std::shared_ptr<Deck::Card> c1, std::shared_ptr<Deck::Card> c2,
     }
 
     if (Ace && score == 21) {
-        std::cout << "Blackjack\n";
         BlackJack = true;
     }
-    std::cout << "or maybe it is?\n";
 }
 
 const std::shared_ptr<std::vector<Deck::Card> > Hand::GetHand() const { return hand; }
