@@ -24,6 +24,7 @@ int main() {
         perror("chdir failed");
         return 1;
     }
+
     int ret = system("cmake .. -DBUILD_SHARED_LIBS=OFF "
                      "-DCMAKE_INSTALL_PREFIX=../install "
                      "-DFT_DISABLE_PNG=ON -DFT_DISABLE_BZIP2=ON "
@@ -32,10 +33,10 @@ int main() {
     if (ret != 0)
         return ret;
 
-    ret = system("cmake --build .");
+    ret = system("cmake --build . --config release");
     if (ret != 0)
         return ret;
-    ret = system("cmake --install .");
+    ret = system("cmake --install . --config release");
     if (ret != 0)
         return ret;
 }
