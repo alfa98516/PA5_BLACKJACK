@@ -33,7 +33,7 @@ Game::Game(Renderer& r, ResourceManager& rm)
                     resourceManager.Get("res/textures/ui/null")};
     Sprite playPressedSprite = {glm::vec2{339.5f, 136.5f}, glm::vec2{142, 74},
                                 resourceManager.Get("res/textures/play_pressed.png"),
-                                true}; // technically the size i set here is incorrect.
+                                true}; // technically the size i set here is incorrecnt.
     // the actual real size is 143 x 73, but the size of the quit button is 142 x 74.
     // Dont pick ms paint as a tool for making assets is the moral of the story here.
 

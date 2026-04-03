@@ -37,7 +37,7 @@ struct Button {
     bool WasHitThisFrame = false;
 
   public:
-    static constexpr int Wait = 40;
+    static constexpr int Wait = 80;
     Button(Sprite, Sprite, Action);
     Action WasHit();
     void Update();
@@ -66,7 +66,7 @@ class Game {
     std::shared_ptr<Hand> PlayerHand;
     std::shared_ptr<Hand> DealerHand;
 
-    const int ActionLength = 200;
+    const int ActionLength = 400;
     int ActionCounter = 0; // much like the counter on the buttons, designed to add waiting time.
 
     bool PlayerBust = false;
