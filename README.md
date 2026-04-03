@@ -7,8 +7,8 @@ I got the program working on WSL on my home PC which runs windows, anything beyo
 ## Compiling the program.
 There are several steps to compiling, first step is compiling the bootstrap script (initializes FreeType): <br>
 All of these are done in a bash or bash-like terminal.
-1. Compiling the bootstrap script:
-Type this into your terminal and run:
+1. Compiling the bootstrap script: <br>
+Type this into your terminal and run: <br>
 Make sure you are in the top directory when running these.
 ```bash
 gcc bootstrap_libs.c -o bootstrap
@@ -19,7 +19,7 @@ gcc bootstrap_libs.c -o bootstrap
 ```
 Next step is compiling the actual program: <br>
 These are also done in the terminal 
-1. Creating the build directory:
+1. Creating the build directory: <br>
 Make sure you are in the top directory when running these.
 ```bash
 cmake -B build
